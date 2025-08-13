@@ -1,0 +1,66 @@
+###
+This first 6 lines enables using "effective name of x" instead of just name of x. 
+When the name for an item is not set (Vanilla items for example), using "name of x" returns <none>
+Using "effective name of x" however, returns their Minecraft item name when name is not set
+###
+import:
+	com.shanebeestudios.skbee.api.wrapper.ComponentWrapper
+
+item property effective name:
+	get:
+		return ComponentWrapper.fromComponent(expr-1.effectiveName())
+###
+This part is only if you use &#rrggbb format for your luckperms prefix. 
+This automatically changes your format from &#rrggbb to <#rrggbb>
+###
+function colorFormat(text:text) :: text:
+    return {_text}.replaceAll("&#([a-fA-F0-9]{6})", "<#$1>")
+
+options:
+    regex:
+        item: (?i)\[(i|item|hand)\]
+        offhand_item: (?i)\[(offhand)\]
+        helmet: (?i)\[(helmet|helm|head)\]
+        chestplate: (?i)\[(chestplate|chest)\]
+        leggings: (?i)\[(leggings|legs)\]
+        boots: (?i)\[(boots|shoes|feet)\]
+
+local function replaceableItem(item:item, player:player) :: text component:
+    if {_item} is air:
+        return text component from "&7[&fAir&7]&r"
+    else:
+        set {_item::amount} to amount of {_item} in {_player}
+        set {_itemAmount} to " &fx%{_item::amount}%"
+        set {_item::name} to effective name of {_item}
+        set {_component} to merge components "&7[&f", {_item::name}, {_itemAmount}, "&7]&r"
+        add a new hover event showing 1 of {_item} to {_component}
+        return {_component}
+
+on async chat:
+    set {_message} to async chat message
+    set {_chatColor} to ({chatcolor::%player%} ? "<gray>") parsed as color
+    set {_rankColor} to last string color code of player's prefix
+    loop players:
+        {_message} partially matches "(?i)@?(%name of loop-player%|%display name of loop-player%)\b"
+        set {_color} to rgb(246, 255, 120)
+        set {_mention} to text component from "@%(display name of loop-player)%"
+        set color format of {_mention} to {_color}
+        component replace "(?i)@?(%name of loop-player%|%display name of loop-player%)\b" with {_mention} in {_message}
+        play sound "entity.experience_orb.pickup" for loop-player
+    component replace "{@regex.item}" with replaceableItem(player's tool, player) in {_message}
+    component replace "{@regex.offhand_item}" with replaceableItem(player's offhand tool, player) in {_message}
+    component replace "{@regex.helmet}" with replaceableItem(player's helmet, player) in {_message}
+    component replace "{@regex.chestplate}" with replaceableItem(player's chestplate, player) in {_message}
+    component replace "{@regex.leggings}" with replaceableItem(player's leggings, player) in {_message}
+    component replace "{@regex.boots}" with replaceableItem(player's boots, player) in {_message}
+    set {_format::*} to merge components (formatted colorFormat(player's prefix + ({name::%player%} ? name of player))) and "&7:"
+    set {_format} to merge components {_format::*} with " "
+    set async chat format to (merge components {_format} and {_message} with " ")
+
+###
+DM "buffprimo" on discord if you're still confused about something or need any help regarding this skript
+Requires Skript, skBee and skript-reflect
+###
+
+
+
