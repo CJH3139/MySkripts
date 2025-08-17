@@ -1,0 +1,49 @@
+###
+A super simple mining Skript made for box servers, built to be easy to configure.
+It doesn’t pack a ton of features (and could definitely be optimized), but the whole point is to give box server owners a clean, fill-in-the-blank setup kinda thing.
+It’s still better than 99% of the box server setups out there (Under 50 lines) and way better than spamming 500 else ifs.
+
+💡 For best performance, enable RAM variables.
+❓ Need help? DM buffprimo (CJH) on Discord.
+###
+on load:
+    delete {-compressed::*}
+    delete {-blocksList::*}
+    set {_blocksList::*} to #List of the acutal blocks you see on the mines (Eg: oak log, stone, coal ore and iron ore)
+    set {_dropList::*} to #List of the drops that you're gonna be getting on mine (Eg: oak planks, stone, coal and iron ingot)
+    set {_compressedItems::*} to #List of the base blocks used for the compressed block
+    set {_nameList::*} to #Name of the compressed blocks you're gonna be setting
+    loop {_blocksList::*}:
+        set {-blocksList::%loop-value%} to {_blocksList::%loop-iteration%}
+        set {-dropList::%loop-value%} to {_dropList::%loop-iteration%}
+        set {-compressed::%loop-value%} to {_compressedItems::%loop-iteration%} with glint named {_nameList::%loop-iteration%}
+
+local function isInventoryFull(player:player) :: boolean:
+    if {_player} has space for 1 of dirt:
+        return false
+    else:
+        return true
+
+on break:
+    if all:
+        player's gamemode is survival
+        {-blocksList::%type of event-block%} is set
+    then:
+        cancel drops
+        set {_block} to type of event-block
+        if isInventoryFull(player) is false:
+            set {_fortune} to level of fortune of player's tool ? 1
+            give {_fortune} of {_block} to player
+            handleAutocompression(player, {_block})
+        else:
+            send title "&cInventory is full!" to player
+            play sound "block.note_block.bass" at volume 100 to player
+    
+function handleAutocompression(player: player, item: item):
+    {_player} has 1 of {_item}
+    set {_amount} to amount of {_item} in {_player}'s inventory
+    if {_amount} >= 64:
+        set {_comp} to floor({_amount} / 64)
+        set {_left} to ({_comp} * 64) - {_amount}
+        remove ({_comp} * 64) of {_item} from {_player}'s inventory
+        give {_comp} of {-compressed::%{_item}%} to {_player}
