@@ -16,6 +16,7 @@ on load:
     loop {_blocksList::*}:
         set {-blocksList::%loop-value%} to {_blocksList::%loop-iteration%}
         set {-dropList::%loop-value%} to {_dropList::%loop-iteration%}
+    loop {_dropList::*}:
         set {-compressed::%loop-value%} to {_compressedItems::%loop-iteration%} with glint named {_nameList::%loop-iteration%}
 
 local function isInventoryFull(player:player) :: boolean:
@@ -33,8 +34,8 @@ on break:
         set {_block} to type of event-block
         if isInventoryFull(player) is false:
             set {_fortune} to level of fortune of player's tool ? 1
-            give {_fortune} of {_block} to player
-            handleAutocompression(player, {_block})
+            give {_fortune} of {-dropList::%{_block}%} to player
+            handleAutocompression(player, {-dropList::%{_block}%})
         else:
             send title "&cInventory is full!" to player
             play sound "block.note_block.bass" at volume 100 to player
