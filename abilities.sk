@@ -1,0 +1,106 @@
+###
+A simple but powerful abilities Skript made for Minecraft servers.  
+Each ability is tied to an item, comes with a cooldown, and is easy to customize or expand.  
+The whole point is to give server owners a clean and modular system without messy code or endless condition checks.  
+
+It’s lightweight, flexible, and perfect for PvP or box servers that want unique gameplay features.  
+
+💡 Abilities include Dash, Heal, Health Steal, Freeze, Lightning, Knockback, Poison, and Time Vortex.  
+❓ Need help? DM buffprimo (CJH) on Discord.  
+###
+
+struct Ability:
+    identifier: string
+    item: item
+    name: string
+    lore: string
+    cooldown: integer
+
+on load:
+    delete {-abilityData::*}
+    registerAbility("dasher", amethyst shard, "&fᴅᴀsʜᴇʀ", "&7ʀɪɢʜᴛ ᴄʟɪᴄᴋ ᴛᴏ ᴅᴀsʜ ғᴏʀᴡᴀʀᴅ", 35)
+    registerAbility("healer", red dye, "&fʜᴇᴀʟᴇʀ", "&7ʀɪɢʜᴛ ᴄʟɪᴄᴋ ᴛᴏ ʜᴇᴀʟ ʏᴏᴜʀsᴇʟғ", 35)
+    registerAbility("stealer", netherite sword, "&fʜᴇᴀʟᴛʜ sᴛᴇᴀʟᴇʀ", "&7sᴛᴇᴀʟ ᴘʟᴀʏᴇʀs ʜᴇᴀʟᴛʜ", 60)
+    registerAbility("isolator", recovery compass, "&fɪsᴏʟᴀᴛᴏʀ", "&7ғʀᴇᴇᴢᴇ ᴘʟᴀʏᴇʀs", 30)
+    registerAbility("knockback", stick, "&fᴋɴᴏᴄᴋʙᴀᴄᴋ sᴛɪᴄᴋ", "&7ᴋɴᴏᴄᴋ ᴘʟᴀʏᴇʀs ʙᴀᴄᴋ", 15)
+    registerAbility("lightning", lightning rod, "&fʟɪɢʜᴛɪɴɢ sᴛᴀғғ", "&7sᴛʀɪᴋᴇ ᴘʟᴀʏᴇʀs ᴡɪᴛʜ ʟɪɢʜᴛɪɴɢ", 20)
+    registerAbility("poison", bamboo, "&fᴛɪᴍᴇ ᴠᴏʀᴛᴇx", "&7sʟᴏᴡ ᴅᴏᴡɴ ᴛɪᴍᴇ", 20)
+    registerAbility("time", clock, "&fᴛɪᴍᴇ ᴠᴏʀᴛᴇx", "&7sʟᴏᴡ ᴅᴏᴡɴ ᴛɪᴍᴇ", 20)
+
+local function registerAbility(identifier:string, item:item, name:string, lore:string, cooldown:integer):
+    set {-abilityData::%{_identifier}%} to Ability struct with initial values:
+        identifier: {_identifier}
+        item: {_item}
+        name: {_name}
+        lore: {_lore}
+        cooldown: {_cooldown}
+
+function getAbility(identifier:string) :: item:
+    set {_data} to {-abilityData::%{_identifier}%}
+    set {_item} to {_data}->item named {_data}->name with lore {_data}->lore
+    set (string tag "ability" of custom nbt of {_item}) to {_data}->identifier
+    return {_item}
+
+command /giveability <name:string>:
+    permission: op
+    permission message: "&c:no_entry: You don't have permission to use this command."
+    trigger:
+        {-abilityData::%{_name}%} is set
+        give 1 of getAbility({_name}) to player
+
+on tab complete of "/giveability":
+    set tab completion for position 1 to (indexes of {-abilityData::*})
+
+local function dasher(player:player):
+    push {_player} forward at speed 3.3
+    send "&6:zap: You used your dash ability! :zap:" to {_player}
+local function healer(player:player):
+    apply potion of regeneration of tier 3 to {_player} for 5 seconds without any particles
+    send "&aYou received Regeneration III!" to {_player}
+local function stealer(victim:player, attacker:player):
+    if health of {_victim} > 4: 
+        set health of {_victim} to (health of {_victim} - 4)
+        set health of {_attacker} to min((health of {_attacker} + 4), max health of {_attacker})
+        send "&aYou stole 2 hearts from &f%{_victim}%&a!" to {_attacker}
+        send "&cYou lost 2 hearts to &f%{_attacker}%&c's Health Stealer!" to {_victim}
+    else:
+        send "&c%{_victim}% doesn't have enough health to steal!" to {_attacker}
+local function isolator(victim:player, attacker:player):
+    set metadata tag "isolator" of {_victim} to true
+    wait 5 seconds
+    delete metadata tag "isolator" of {_victim}
+    send "&c❄ You have been frozen by &f%{_attacker}%&c!" to {_victim}
+    send "&aYou froze &f%{_victim}%&a for 5 seconds!" to {_attacker}
+local function lightning(victim:player, attacker:player):
+    strike lightning effect at {_victim}
+    damage {_victim} by 7 hearts
+    send "&b:zap: You smote &f%{_victim}%&b with lightning!" to {_attacker}
+    send "&c:zap: You have been struck by &f%{_attacker}%&c's staff!" to {_victim}
+local function knockback(victim:player, attacker:player):
+    push victim away from attacker at velocity (random number between 0.5 and 1.0) * 10
+    send "&aYou knocked back &f%{_victim}%&a!" to {_attacker}
+    send "&cYou were knocked back by &f%{_attacker}%&c!" to {_victim}
+local function poison(victim:player,attacker:player):
+        apply poison 4 to {_victim} for 5 seconds without any particles
+        send "&a☠ You poisoned &f%{_victim}%&a!" to {_attacker}
+        send "&c☠ You have been poisoned by &f%{_attacker}%&c!" to {_victim}
+local function time(victim:player, attacker:player):
+        apply slowness 4 to {_victim} for 5 seconds without any particles
+        apply slow falling 1 to {_victim} for 5 seconds without any particles
+        send "&aYou froze &f%{_victim}%&a in time!" to {_attacker}
+        send "&cYou have been frozen in time by &f%{_attacker}%&c!" to {_victim}
+
+on right click:
+    string tag "ability" of custom nbt of player's tool is set
+    set {_identifier} to string tag "ability" of custom nbt of player's tool
+    set {_cooldown} to {-abilityData::%{_identifier}%}->cooldown
+    run function named {_identifier} with arguments player
+    set item cooldown of player's tool for player to timespan({_cooldown}, seconds)
+
+on damage of player:
+    string tag "ability" of custom nbt of attacker's tool is set
+    set {_identifier} to string tag "ability" of custom nbt of attacker's tool
+    set {_cooldown} to {-abilityData::%{_identifier}%}->cooldown
+    run function named {_identifier} with arguments victim and attacker
+    set item cooldown of attacker's tool for attacker to timespan({_cooldown}, seconds)
+
