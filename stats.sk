@@ -1,0 +1,57 @@
+###
+A clean and easy-to-use player statistics GUI.  
+It shows a player’s equipped gear, playtime, kills, deaths and coins in a neat UI.  
+The design is lightweight, simple to customize, and great for PvP, box, or survival servers.  
+
+❓ Need help? DM buffprimo (CJH) on Discord.
+❤️If these skripts help your server, consider giving the repo a ⭐ to support the project!  
+###
+
+function statsGUI(player:player, target:player={_null}):
+    set {_target} to {_target} ? {_player}
+    set {_gui} to a new chest inventory with 6 rows named "%{_target}%'s Statistics"
+    set slot (integers between 0 and 53) of {_gui} to light blue stained glass pane named "&7" without tooltip
+    set {_statSlots::*} to 11, 19, 20, 21, 29 and 38
+    loop {_statSlots::*}:
+        set slot loop-value of {_gui} to barrier named "&cNot equipped!"
+    if helmet of {_target} is not air:
+        set slot 11 of {_gui} to helmet of {_target} 
+    if offhand tool of {_target} is not air:
+        set slot 19 of {_gui} to offhand tool of {_target}
+    if chestplate of {_target} is not air:
+        set slot 20 of {_gui} to chestplate of {_target}
+    if tool of {_target} is not air:
+        set slot 21 of {_gui} to tool of {_target}
+    if leggings of {_target} is not air:
+        set slot 29 of {_gui} to leggings of {_target}
+    if boots of {_target} is not air:
+        set slot 38 of {_gui} to boots of {_target}
+    set slot 24 of {_gui} to clock named "&f%prefix of {_target}%%{_target}%'s Stats:" with lore "","&d⌚ &f%hours of {_target}'s time played% &dʜᴏᴜʀs ᴘʟᴀʏᴛɪᴍᴇ", "<#ee6666>🗡 &f%player_kills stat of {_target}% <#ee6666>ᴋɪʟʟs", "&8☠ &f%deaths stat of {_target}% &8ᴅᴇᴀᴛʜs", "&a⛃ &f%money of {_target}%&aᴄᴏɪɴs"
+    set slot 49 of {_gui} to barrier named "&c× Close"
+    set metadata tag "statsGUI" of {_player} to {_gui}
+    open {_gui} to {_player}
+
+command /stats [<player: player = %sender%>]:
+    trigger:
+        if any:
+            {_player} is not op
+            sender is op
+        then:
+            statsGUI(player, {_player})
+        else:
+            send "%{-constants::prefix}% &cYou cannot open the statistics of this player!"
+
+on right click on player:
+    player is sneaking
+    statsGUI(player, clicked entity)
+
+on inventory click:
+    metadata tag "statsGUI" of player is set
+    event-inventory is player's top inventory
+    cancel event
+    index of event-slot is 49
+    close inventory of player
+
+on inventory close:
+    metadata tag "statsGUI" of player is set
+    delete metadata tag "statsGUI" of player
