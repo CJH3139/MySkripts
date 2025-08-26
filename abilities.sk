@@ -7,6 +7,7 @@ It’s lightweight, flexible, and perfect for PvP or box servers that want uniqu
 
 💡 Abilities include Dash, Heal, Health Steal, Freeze, Lightning, Knockback, Poison, and Time Vortex.  
 ❓ Need help? DM buffprimo (CJH) on Discord.  
+❤️If these skripts help your server, consider giving the repo a ⭐ to support the project!  
 ###
 
 struct Ability:

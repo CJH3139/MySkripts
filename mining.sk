@@ -5,6 +5,7 @@ It’s still better than 99% of the box server setups out there (Under 50 lines)
 
 💡 For best performance, enable RAM variables.
 ❓ Need help? DM buffprimo (CJH) on Discord.
+❤️If these skripts help your server, consider giving the repo a ⭐ to support the project!  
 ###
 on load:
     delete {-compressed::*}
