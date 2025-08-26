@@ -2,7 +2,7 @@
 
 Welcome to my skript page, a collection of high-quality [Skript](https://skriptlang.github.io/Skript/) addons and scripts designed to help you improve and develop your Minecraft server with ease.  
 
-This repository only contains **polished skripts** that are especially made to be efficient, customizable, and easy to use.  
+This repository only contains **polished, high-demand skripts** that are specifically made to be efficient, customizable, and easy to use.  
 Whether you're building a **box server**, **survival**, or something completely unique, you'll find useful features here to help your community.  
 
 ## 📂 What's Inside
